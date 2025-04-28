@@ -1,10 +1,13 @@
 import aiosqlite
 from config import DB_PATH
 
+async def get_db():
+    return await aiosqlite.connect(DB_PATH)
+
 async def create_db():
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute('''
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS profiles (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 telegram_id INTEGER UNIQUE,
                 name TEXT,
