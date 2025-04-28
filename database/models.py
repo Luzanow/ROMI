@@ -38,3 +38,22 @@ async def get_random_user(current_user_id: int):
         )
         users = await cursor.fetchall()
         return users
+
+# Додати лайк
+async def add_like(user_id: int, liked_id: int):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            "INSERT INTO likes (user_id, liked_id) VALUES (?, ?)",
+            (user_id, liked_id)
+        )
+        await db.commit()
+
+# Перевірити чи є взаємний лайк
+async def check_match(user_id: int, liked_id: int):
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute(
+            "SELECT 1 FROM likes WHERE user_id = ? AND liked_id = ?",
+            (user_id, liked_id)
+        )
+        match = await cursor.fetchone()
+        return match is not None
