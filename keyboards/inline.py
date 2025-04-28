@@ -1,11 +1,13 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-def like_dislike_kb(user_id):
+def like_dislike_keyboard(user_id: int):
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="❤️ Лайк", callback_data=f"like_{user_id}"),
-                InlineKeyboardButton(text="❌ Пропустити", callback_data="skip")
+                InlineKeyboardButton(text="❤️", callback_data=f"like_{user_id}"),
+                InlineKeyboardButton(text="📩", callback_data=f"chat_{user_id}"),
+                InlineKeyboardButton(text="👎", callback_data=f"dislike_{user_id}"),
+                InlineKeyboardButton(text="😴", callback_data="skip"),
             ]
         ]
     )
