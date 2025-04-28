@@ -39,16 +39,18 @@ async def get_photo(message: Message, state: FSMContext):
         await message.answer("Будь ласка, надішли саме фото!")
         return
 
+    # Оновлюємо state з фото
+    await state.update_data(photo=message.photo[-1].file_id)
     data = await state.get_data()
-    
-    photo_file_id = message.photo[-1].file_id
+
+    # Створюємо анкету
     await create_profile(
         telegram_id=message.from_user.id,
         name=data['name'],
         age=data['age'],
         gender="Не вказано",
         bio=data['bio'],
-        photo=photo_file_id,
+        photo=data['photo'],
         looking_for="Будь-хто"
     )
 
@@ -60,8 +62,8 @@ async def get_photo(message: Message, state: FSMContext):
 
     await message.bot.send_photo(
         chat_id=message.chat.id,
-        photo=photo_file_id,
-        caption=profile_text
+        photo=data['photo'],
+        caption="Ось як виглядає твоя анкета:\n\n" + profile_text
     )
 
     await message.answer(
