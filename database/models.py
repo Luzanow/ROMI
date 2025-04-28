@@ -1,7 +1,7 @@
 import aiosqlite
 from config import DB_PATH
 
-# Створення анкети
+# Створення нової анкети
 async def create_profile(telegram_id: int, name: str, age: int, bio: str, gender: str, looking_for: str, photo: str):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
@@ -29,8 +29,12 @@ async def update_profile(telegram_id: int, name: str, age: int, bio: str, gender
         )
         await db.commit()
 
-# Пошук інших анкет
+# Отримати випадкового користувача для пошуку
 async def get_random_user(current_user_id: int):
     async with aiosqlite.connect(DB_PATH) as db:
         cursor = await db.execute(
-            "SELECT id, telegram_id, name, age, gender, bio,_
+            "SELECT id, telegram_id, name, age, gender, bio, photo, looking_for FROM users WHERE telegram_id != ? ORDER BY RANDOM() LIMIT 10",
+            (current_user_id,)
+        )
+        users = await cursor.fetchall()
+        return users
