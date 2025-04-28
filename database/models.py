@@ -28,3 +28,13 @@ async def update_profile(telegram_id: int, name: str, age: int, bio: str, gender
             (name, age, bio, gender, looking_for, photo, telegram_id)
         )
         await db.commit()
+
+# Пошук інших анкет
+async def get_random_user(current_user_id: int):
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute(
+            "SELECT id, telegram_id, name, age, gender, bio, photo, looking_for FROM users WHERE telegram_id != ? ORDER BY RANDOM() LIMIT 10",
+            (current_user_id,)
+        )
+        users = await cursor.fetchall()
+        return users
