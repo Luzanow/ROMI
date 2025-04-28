@@ -13,6 +13,6 @@ async def search_profiles(message: Message):
         return
     for user in users:
         user_id, telegram_id, name, age, gender, bio, photo, looking_for = user
-        text = f"👤 {name}, {age} років
+        text = f"{name}, {age} років"
 📄 {bio}"
         await message.bot.send_photo(chat_id=message.chat.id, photo=photo, caption=text, reply_markup=like_dislike_kb(telegram_id))
