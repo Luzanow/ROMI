@@ -22,23 +22,24 @@ def reaction_keyboard():
 async def show_random_profile(message: Message, state: FSMContext):
     users = await get_random_user(current_user_id=message.from_user.id)
     if not users:
-        await message.answer("Немає більше анкет 😢")
+        await message.answer("😢 Анкет більше немає у твоєму місті.")
         return
 
-    user = users[0]  # Вибираємо перший з випадкових
+    user = users[0]
+    await state.update_data(current_shown_id=user[1])  # telegram_id
+
     profile_text = (
-        f"{user['name']}, {user['age']} років\n"
-        f"📍 {user['city']}\n"
-        f"💬 {user['bio']}"
+        f"{user[2]}, {user[3]} років\n"       # name, age
+        f"📍 {user[9]}\n"                      # city
+        f"💬 {user[5]}"                        # bio
     )
 
     await message.bot.send_photo(
         chat_id=message.chat.id,
-        photo=user['photo'],
+        photo=user[6],  # photo file_id
         caption=profile_text,
         reply_markup=reaction_keyboard()
     )
-    await state.update_data(current_shown_id=user['telegram_id'])
 
 @router.callback_query(F.data.in_(["like", "dislike", "skip", "photo"]))
 async def handle_reaction(callback: CallbackQuery, state: FSMContext):
@@ -47,11 +48,13 @@ async def handle_reaction(callback: CallbackQuery, state: FSMContext):
 
     if callback.data == "like":
         await callback.message.answer("💘 Тобі сподобалась анкета!")
+        # await save_like(callback.from_user.id, shown_user_id)
     elif callback.data == "dislike":
-        await callback.message.answer("🙈 Анкету пропущено")
+        await callback.message.answer("🙈 Ти пропустив(ла) цю анкету.")
     elif callback.data == "photo":
-        await callback.message.answer("📷 Фото вже показано 😊")
+        await callback.message.answer("📸 Фото вже показано 😉")
     elif callback.data == "skip":
-        await callback.message.answer("➡️ Наступна анкета")
+        await callback.message.answer("➡️ Переходимо до наступної анкети...")
 
+    await callback.message.delete()
     await show_random_profile(callback.message, state)
