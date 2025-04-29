@@ -1,4 +1,3 @@
-# database/models.py
 import aiosqlite
 from config import DB_PATH
 
@@ -27,16 +26,16 @@ async def create_db():
         ''')
         await db.commit()
 
-# Створення анкети
+# Створення анкети користувача
 async def create_profile(telegram_id: int, name: str, age: int, gender: str, bio: str, photo: str, looking_for: str, city: str):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("""
-            INSERT INTO users (telegram_id, name, age, gender, bio, photo, looking_for, city)
+            INSERT OR REPLACE INTO users (telegram_id, name, age, gender, bio, photo, looking_for, city)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (telegram_id, name, age, gender, bio, photo, looking_for, city))
         await db.commit()
 
-# Отримати свою анкету
+# Отримати анкету за telegram_id
 async def get_profile(telegram_id: int):
     async with aiosqlite.connect(DB_PATH) as db:
         cursor = await db.execute("""
@@ -45,14 +44,15 @@ async def get_profile(telegram_id: int):
         """, (telegram_id,))
         return await cursor.fetchone()
 
-# Пошук інших користувачів з того самого міста
-async def get_random_users(current_user_id: int):
+# Пошук випадкового користувача в тому ж місті (окрім себе)
+async def get_random_user(current_user_id: int):
     async with aiosqlite.connect(DB_PATH) as db:
+        # Отримуємо місто поточного користувача
         cursor = await db.execute("SELECT city FROM users WHERE telegram_id = ?", (current_user_id,))
-        result = await cursor.fetchone()
-        if not result:
-            return []
-        current_city = result[0]
+        row = await cursor.fetchone()
+        if not row:
+            return None
+        current_city = row[0]
 
         cursor = await db.execute("""
             SELECT id, telegram_id, name, age, gender, bio, photo, looking_for, city
@@ -61,4 +61,4 @@ async def get_random_users(current_user_id: int):
             ORDER BY RANDOM()
             LIMIT 1
         """, (current_user_id, current_city))
-        return await cursor.fetchall()
+        return await cursor.fetchone()
