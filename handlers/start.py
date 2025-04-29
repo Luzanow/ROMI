@@ -1,8 +1,14 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
+
+# Імпортуємо кнопки з правильного місця
 from keyboards.registration import gender_keyboard, looking_for_keyboard, confirm_keyboard
+
+# Імпортуємо стани
 from states.registration import RegistrationStates
+
+# Функція збереження профілю
 from database.models import create_profile
 
 router = Router()
