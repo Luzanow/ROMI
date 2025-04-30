@@ -35,7 +35,7 @@ async def create_profile(telegram_id: int, name: str, age: int, gender: str, bio
         """, (telegram_id, name, age, gender, bio, photo, looking_for, city))
         await db.commit()
 
-# Отримати анкету за telegram_id
+# Отримання анкети
 async def get_profile(telegram_id: int):
     async with aiosqlite.connect(DB_PATH) as db:
         cursor = await db.execute("""
@@ -44,10 +44,18 @@ async def get_profile(telegram_id: int):
         """, (telegram_id,))
         return await cursor.fetchone()
 
-# Пошук випадкового користувача в тому ж місті (окрім себе)
+# Додавання лайку
+async def add_like(user_id: int, liked_id: int):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("""
+            INSERT INTO likes (user_id, liked_id)
+            VALUES (?, ?)
+        """, (user_id, liked_id))
+        await db.commit()
+
+# Пошук випадкової анкети з того ж міста
 async def get_random_user(current_user_id: int):
     async with aiosqlite.connect(DB_PATH) as db:
-        # Отримуємо місто поточного користувача
         cursor = await db.execute("SELECT city FROM users WHERE telegram_id = ?", (current_user_id,))
         row = await cursor.fetchone()
         if not row:
